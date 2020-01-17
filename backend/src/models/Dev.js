@@ -3,11 +3,11 @@ import mongoose from 'mongoose'
 const DevSchema = new mongoose.Schema({
   username: {
     type: String,
-    required: true
+    required: true,
   },
   techs: {
     type: [String],
-    default: []
+    default: [],
   },
   name: {
     type: String,
@@ -15,23 +15,23 @@ const DevSchema = new mongoose.Schema({
   },
   avatar_url: {
     type: String,
-    required: true
+    required: true,
   },
   bio: {
     type: String,
-    required: true
+    required: true,
   },
   location: {
     type: {
       type: String,
       enum: ['Point'],
-      required: true
+      required: true,
     },
     coordinates: {
       type: [Number],
-      required: true
+      required: true,
     },
-  }
+  },
 })
 
 DevSchema.index({ location: '2dsphere' })

@@ -1,11 +1,21 @@
 import React from 'react'
-import { View, Text } from 'react-native'
+import { StyleSheet } from 'react-native'
+import { WebView } from 'react-native-webview'
 
-function Profile() {
+const styles = StyleSheet.create({
+  webView: {
+    flex: 1,
+  },
+})
+
+function Profile({ navigation }) {
+  const username = navigation.getParam('username')
+
   return (
-    <View>
-      <Text>Profile</Text>
-    </View>
+    <WebView
+      style={styles.webView}
+      source={{ uri: `https://github.com/${username}` }}
+    />
   )
 }
 

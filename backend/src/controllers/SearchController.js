@@ -6,17 +6,17 @@ class SearchController {
 
     const devs = await Dev.find({
       techs: {
-        $in: techs.split(',').map(it => it.trim())
+        $in: techs.split(',').map(it => it.trim()),
       },
       location: {
         $near: {
           $maxDistance: 1000,
           $geometry: {
             type: 'Point',
-            coordinates: [longitude, latitude]
-          }
-        }
-      }
+            coordinates: [longitude, latitude],
+          },
+        },
+      },
     })
 
     return res.status(200).json(devs)

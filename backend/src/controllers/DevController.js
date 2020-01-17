@@ -1,11 +1,17 @@
 import axios from 'axios'
+import githubConfig from '../config/github'
 import Dev from '../models/Dev'
 
 class DevController {
   async store(req, res) {
     const { username, techs, latitude, longitude } = req.body
 
-    const response = await axios.get(`https://api.github.com/users/${username}`)
+    const response = await axios.get(
+      `https://api.github.com/users/${username}`,
+      {
+        headers: { authorization: githubConfig.token },
+      }
+    )
 
     const { name = login, avatar_url, bio } = response.data
 
@@ -17,8 +23,8 @@ class DevController {
       bio,
       location: {
         type: 'Point',
-        coordinates: [longitude, latitude]
-      }
+        coordinates: [longitude, latitude],
+      },
     })
 
     res.status(200).json(dev)

@@ -8,7 +8,10 @@ import databaseConfig from './config/database'
 
 const app = express()
 
-mongoose.connect(databaseConfig.url, { useUnifiedTopology: true, useNewUrlParser: true })
+mongoose.connect(databaseConfig.url, {
+  useUnifiedTopology: true,
+  useNewUrlParser: true,
+})
 
 app.use(cors())
 
