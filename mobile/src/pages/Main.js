@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { Image, StyleSheet, Text, View } from 'react-native'
+import {
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native'
 import MapView, { Callout, Marker } from 'react-native-maps'
+import { MaterialIcons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 
 import api from '../services/api'
@@ -30,10 +38,39 @@ const styles = StyleSheet.create({
   userBio: {
     fontSize: 16,
   },
+  searchContainer: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    left: 0,
+    justifyContent: 'space-between',
+    position: 'absolute',
+    padding: 16,
+    right: 0,
+    top: 0,
+  },
+  searchInput: {
+    backgroundColor: '#fff',
+    borderRadius: 4,
+    elevation: 2,
+    flex: 1,
+    height: 54,
+    marginRight: 4,
+    paddingHorizontal: 16,
+  },
+  searchButton: {
+    backgroundColor: '#7d40e7',
+    elevation: 2,
+    alignItems: 'center',
+    borderRadius: 50,
+    justifyContent: 'center',
+    height: 54,
+    width: 54,
+  },
 })
 
 const useMain = function() {
   const [currentRegion, setCurrentRegion] = useState(null)
+  const [techs, setTechs] = useState('')
   const [users, setUsers] = useState([])
 
   useEffect(() => {
@@ -61,20 +98,33 @@ const useMain = function() {
 
   useEffect(() => {
     async function loadUsers() {
-      try {
-        const response = await api.get('/user')
-        setUsers(response.data)
-      } catch (e) {
-        console.log(e)
-      }
+      const response = await api.get('/user')
+      setUsers(response.data)
     }
 
     loadUsers()
   }, [])
 
+  async function searchUsers() {
+    const { latitude, longitude } = currentRegion
+
+    const response = await api.get('search', {
+      params: {
+        latitude,
+        longitude,
+        techs,
+      },
+    })
+
+    setUsers(response.data)
+  }
+
   return {
     currentRegion,
     users,
+    techs,
+    setTechs,
+    searchUsers,
   }
 }
 
@@ -86,33 +136,48 @@ function Main({ navigation }) {
   }
 
   return (
-    <MapView region={main.currentRegion} style={styles.map}>
-      <Marker
-        coordinate={{
-          longitude: -47.4196327,
-          latitude: -20.5434353,
-        }}
-      >
-        <Image
-          source={{
-            uri: 'https://avatars2.githubusercontent.com/u/17479978?v=4',
-          }}
-          style={styles.userAvatar}
-        />
+    <>
+      <MapView region={main.currentRegion} style={styles.map}>
+        {main.users.map(it => (
+          <Marker
+            key={it._id}
+            coordinate={{
+              longitude: it.location.coordinates[0],
+              latitude: it.location.coordinates[1],
+            }}
+          >
+            <Image source={{ uri: it.avatar_url }} style={styles.userAvatar} />
 
-        <Callout
-          onPress={() =>
-            navigation.navigate('Profile', { username: 'flaviogf' })
-          }
+            <Callout
+              onPress={() =>
+                navigation.navigate('Profile', { username: it.username })
+              }
+            >
+              <View style={styles.callout}>
+                <Text style={styles.userName}>{it.name}</Text>
+                <Text style={styles.userTechs}>{it.techs.join(',')}</Text>
+                <Text style={styles.userBio}>{it.bio}</Text>
+              </View>
+            </Callout>
+          </Marker>
+        ))}
+      </MapView>
+
+      <View style={styles.searchContainer}>
+        <TextInput
+          placeholder="Search by techs ..."
+          onChangeText={main.setTechs}
+          style={styles.searchInput}
+          value={main.techs}
+        />
+        <TouchableOpacity
+          style={styles.searchButton}
+          onPress={main.searchUsers}
         >
-          <View style={styles.callout}>
-            <Text style={styles.userName}>Flavio</Text>
-            <Text style={styles.userTechs}>NodeJS, React JS, React Native</Text>
-            <Text style={styles.userBio}>Developer at smn.</Text>
-          </View>
-        </Callout>
-      </Marker>
-    </MapView>
+          <MaterialIcons name="my-location" color="#fff" size={20} />
+        </TouchableOpacity>
+      </View>
+    </>
   )
 }
 

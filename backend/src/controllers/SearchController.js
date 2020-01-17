@@ -10,7 +10,7 @@ class SearchController {
       },
       location: {
         $near: {
-          $maxDistance: 1000,
+          $maxDistance: 10000,
           $geometry: {
             type: 'Point',
             coordinates: [longitude, latitude],
