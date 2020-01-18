@@ -1,5 +1,6 @@
 import axios from 'axios'
 import githubConfig from '../config/github'
+import Coordinates from '../lib/Coordinates'
 import Dev from '../models/Dev'
 
 class DevController {
@@ -17,7 +18,7 @@ class DevController {
 
     const dev = await Dev.create({
       username,
-      techs: techs.split(',').map(it => it.trim()),
+      techs: techs.split(',').map((it) => it.trim()),
       name,
       avatar_url,
       bio,
@@ -26,6 +27,21 @@ class DevController {
         coordinates: [longitude, latitude],
       },
     })
+
+    const connectionsToNotify = req.connections.filter((connection) => {
+      const hasTheSameInterest = connection.techs.some((tech) => {
+        return techs.includes(tech)
+      })
+
+      const isNear = Coordinates.isNear({
+        source: connection.coordinates,
+        target: { latitude, longitude },
+      })
+
+      return isNear && hasTheSameInterest
+    })
+
+    connectionsToNotify.forEach(({ id }) => req.io.to(id).emit('new-dev', dev))
 
     res.status(200).json(dev)
   }

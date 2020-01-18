@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Image,
   StyleSheet,
@@ -12,6 +12,7 @@ import { MaterialIcons } from '@expo/vector-icons'
 import * as Location from 'expo-location'
 
 import api from '../services/api'
+import createSocket from '../services/socket'
 
 const styles = StyleSheet.create({
   map: {
@@ -69,6 +70,7 @@ const styles = StyleSheet.create({
 })
 
 const useMain = function() {
+  const socket = useMemo(() => createSocket())
   const [currentRegion, setCurrentRegion] = useState(null)
   const [techs, setTechs] = useState('')
   const [users, setUsers] = useState([])
@@ -117,6 +119,17 @@ const useMain = function() {
     })
 
     setUsers(response.data)
+
+    socket.connect({ latitude, longitude, techs })
+
+    socket.subscribe({
+      callback: (user) => {
+        console.log(`${user.name} has been added`)
+
+        setUsers((users) => [...users, user])
+      },
+      event: 'new-dev',
+    })
   }
 
   return {
@@ -138,7 +151,7 @@ function Main({ navigation }) {
   return (
     <>
       <MapView region={main.currentRegion} style={styles.map}>
-        {main.users.map(it => (
+        {main.users.map((it) => (
           <Marker
             key={it._id}
             coordinate={{
