@@ -11,7 +11,7 @@
 
 ## :rocket: Projeto
 
-:globe_with_meridians: Projeto resultado da Semana OmniStack 10 (DevRadar)
+:globe_with_meridians: Projeto resultado da Semana OmniStack 10 (devradar)
 
 ## :computer: Tecnologias
 
